@@ -1,3 +1,4 @@
+using MassTransit;
 using Microsoft.EntityFrameworkCore;
 using ProductApi.Data;
 
@@ -10,6 +11,20 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddDbContext<ProductDbContext>(o => o.UseSqlite(builder.Configuration.GetConnectionString("Default")));
+builder.Services.AddMassTransit(x =>
+{
+  
+    x.UsingRabbitMq((context, cfg) =>
+    {
+        cfg.Host(builder.Configuration["RabbitMQ:Host"], h =>
+        {
+            h.Username(builder.Configuration["RabbitMQ:Username"]);
+            h.Password(builder.Configuration["RabbitMQ:Password"]);
+        });
+ 
+    });
+});
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.

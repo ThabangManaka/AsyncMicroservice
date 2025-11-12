@@ -11,7 +11,7 @@ namespace OrderApi.Controllers
     public class OrderController(IOrder orderService) : ControllerBase
     {
 
-        [Host]
+        [HttpPost]
         public async Task<ActionResult<ServiceResponse>> AddOrder(Order order)
         {
             var response = await orderService.AddOrderAsync(order);

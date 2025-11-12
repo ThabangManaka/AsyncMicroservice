@@ -1,3 +1,5 @@
+using EmailNotificationWebHooks.Consumer;
+using MassTransit;
 using Microsoft.EntityFrameworkCore;
 using OrderApi.Data;
 using OrderApi.Repository;
@@ -13,6 +15,22 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddDbContext<OrderDbContext>(o => o.UseSqlite(builder.Configuration.GetConnectionString("Default")));
+builder.Services.AddMassTransit(x =>
+{
+    x.AddConsumer<ProductConsumer>();
+    x.UsingRabbitMq((context, cfg) =>
+    {
+        cfg.Host(builder.Configuration["RabbitMQ:Host"], h =>
+        {
+            h.Username(builder.Configuration["RabbitMQ:Username"]);
+            h.Password(builder.Configuration["RabbitMQ:Password"]);
+        });
+        cfg.ReceiveEndpoint("product-queue", e =>
+        {
+            e.ConfigureConsumer<ProductConsumer>(context);
+        });
+    });
+});
 //builder.Services.AddScoped<IOrder, OrderRepo>();
 var app = builder.Build();
 
